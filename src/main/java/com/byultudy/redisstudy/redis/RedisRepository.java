@@ -15,11 +15,6 @@ public class RedisRepository {
     }
 
     public Long getCount(String key) {
-        Long qty = redisTemplate.opsForValue().decrement(key);
-        if(qty <0) {
-            throw new RuntimeException("모든 티켓이 소진되었습니다.");
-        }
-        return qty;
-
+        return redisTemplate.opsForValue().increment(key);
     }
 }

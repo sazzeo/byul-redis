@@ -3,11 +3,9 @@ package com.byultudy.redisstudy;
 import com.byultudy.redisstudy.concert.Concert;
 import com.byultudy.redisstudy.concert.ConcertRepository;
 import com.byultudy.redisstudy.concert.ConcertService;
-import com.byultudy.redisstudy.customer.Customer;
-import com.byultudy.redisstudy.customer.CustomerRepository;
 import com.byultudy.redisstudy.redis.RedisRepository;
-import com.byultudy.redisstudy.ticket.Ticket;
 import com.byultudy.redisstudy.ticket.TicketRepository;
+import com.byultudy.redisstudy.ticket.TicketService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -30,54 +28,34 @@ class RedisStudyApplicationTests {
     ConcertService concertService;
     @Autowired
     RedisRepository redisRepository;
-    @Autowired
-    CustomerRepository customerRepository;
+
     @Autowired
     TicketRepository ticketRepository;
+
+    @Autowired
+    TicketService ticketService;
 
     Concert concert;
 
     @BeforeEach
     void setUp() {
+        deleteAll();
         initConcert();
 
     }
 
-    void initConcert() {
+    void deleteAll() {
+        ticketRepository.deleteAll();
         concertRepository.deleteAll();
+    }
+
+    void initConcert() {
         concert = Concert.builder()
                 .id(1L)
-                .ticketQuantity(1000L)
+                .ticketQuantity(100L)
                 .targetDateTime(LocalDateTime.now())
                 .build();
         concertRepository.save(concert);
-    }
-
-    @Test
-    void 티켓예매() throws InterruptedException {
-        int threadCount = 100;
-
-        //ExecutorService : 각기 다른 Thread를 생성해서 작업을 처리하고 완료되면 Thread를 제거하는 작업을 자동으로 해줌
-        ExecutorService executorService = Executors.newFixedThreadPool(32);
-
-        //다른 스레드에서 사용하는 작업을 기다려주는 클래스
-        CountDownLatch latch = new CountDownLatch(threadCount);
-
-        for (int i = 0; i < threadCount; i++) {
-            long userId = i;
-            executorService.submit(() -> {
-                try {
-                    customerRepository.save(Customer.builder().id(userId).name(userId + "").build());
-//                    ticketRepository.save(Ticket.builder().)
-                } finally {
-                    latch.countDown();
-                }
-            });
-        }
-        latch.await(); //메인스레드 멈춤 (위 코드가 다 실행되고 아래 코드를 실행시켜준다)
-
-//        assertThat(count).isEqualTo(100);
-
     }
 
     @DisplayName("캐시테스트")
@@ -92,16 +70,33 @@ class RedisStudyApplicationTests {
         }
     }
 
-    @DisplayName("레디스 테스트")
+    @DisplayName("티켓예매")
     @Test
-    void redisTest2() {
-        redisRepository.setCount("a" , 100L);
+    void 티켓예매() throws InterruptedException {
+        int threadCount = 1000;
 
-        for(int i =0 ; i <=50 ; i++) {
-            System.out.println(     redisRepository.getCount("a"));
+        ExecutorService executorService = Executors.newFixedThreadPool(32);
+        CountDownLatch latch = new CountDownLatch(threadCount);
 
+        for (int i = 0; i < threadCount; i++) {
+            long userId = i;
+            executorService.submit(() -> {
+                try {
+                    ticketService.create(concert.getId(), userId);
+                } catch (Exception e) {
+                    System.out.println("user"+userId+"님 " + e.getMessage());
+                } finally {
+                    latch.countDown();
+                }
+            });
         }
+        latch.await();
+        assertThat(ticketService.count(concert.getId())).isEqualTo(concert.getTicketQuantity());
+    }
+    
+    @Test
+    void reserveTest() {
+        Long reserve = concertService.reserve(1L, 50L);
     }
 
-    //캐시 config 관련설정 해야함
 }

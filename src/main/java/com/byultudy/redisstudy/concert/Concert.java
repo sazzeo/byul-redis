@@ -25,6 +25,6 @@ public class Concert {
     private LocalDateTime targetDateTime;
 
     public void subtractTicketQuantity(Long ticketQuantity) {
-        this.ticketQuantity -= ticketQuantity;
+        this.ticketQuantity = this.ticketQuantity- ticketQuantity;
     }
 }
