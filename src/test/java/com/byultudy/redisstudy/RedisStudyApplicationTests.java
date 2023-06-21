@@ -92,5 +92,16 @@ class RedisStudyApplicationTests {
         }
     }
 
+    @DisplayName("레디스 테스트")
+    @Test
+    void redisTest2() {
+        redisRepository.setCount("a" , 100L);
+
+        for(int i =0 ; i <=50 ; i++) {
+            System.out.println(     redisRepository.getCount("a"));
+
+        }
+    }
+
     //캐시 config 관련설정 해야함
 }

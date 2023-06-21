@@ -10,7 +10,12 @@ public class RedisRepository {
 
     private final RedisTemplate<String, String> redisTemplate;
 
+    public void setCount(String key, Long qty) {
+        redisTemplate.opsForValue().set(key , qty.toString());
+    }
+
     public Long getCount(String key) {
-       return redisTemplate.opsForValue().increment(key);
+       return redisTemplate.opsForValue().decrement(key);
+
     }
 }
