@@ -1,0 +1,12 @@
+- redissonClient 찾아보기  : redis의 pub sub구조를 이용해서 분산락을 만든 java 인터페이스
+  - redis pub sub 구조 알아보기
+- 직접 캐시 구현해보기 => redis 에 오브젝트 저장해 놓고 사용함.
+- sort set 쓰는 이유 => pub sub 구조는 순서를 보장하지 않음.
+- 레디스 insert 서버= >batch 스케쥴러로 돌려보기
+- ReactiveRedisTemplate
+- sorted set 써서 선착순 구현해보기
+
+- @TransactionEventListener : afterCommit
+- 레디션 => 레디스 락 구현해줌
+- java.time.instance => 시간 뽑아주는 애
+- 스케쥴러로 insert 
