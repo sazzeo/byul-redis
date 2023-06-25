@@ -1,13 +1,11 @@
 package com.byultudy.redisstudy.concert;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
+@ToString
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
@@ -21,8 +19,6 @@ public class Concert {
     private Long id;
 
     private Long ticketQuantity;
-
-    private LocalDateTime targetDateTime;
 
     public void subtractTicketQuantity(Long ticketQuantity) {
         this.ticketQuantity = this.ticketQuantity- ticketQuantity;

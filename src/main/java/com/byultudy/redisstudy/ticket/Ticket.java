@@ -5,6 +5,9 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
+
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
@@ -20,5 +23,10 @@ public class Ticket {
     private Long customerId;
 
     private Long concertId;
+
+    @Builder.Default
+    private boolean vip = false;
+
+    private LocalDateTime issueDate;
 
 }

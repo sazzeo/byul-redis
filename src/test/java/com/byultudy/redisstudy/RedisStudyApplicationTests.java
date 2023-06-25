@@ -1,9 +1,11 @@
 package com.byultudy.redisstudy;
 
 import com.byultudy.redisstudy.concert.Concert;
+import com.byultudy.redisstudy.concert.ConcertDto;
 import com.byultudy.redisstudy.concert.ConcertRepository;
 import com.byultudy.redisstudy.concert.ConcertService;
 import com.byultudy.redisstudy.redis.RedisRepository;
+import com.byultudy.redisstudy.ticket.TicketDto;
 import com.byultudy.redisstudy.ticket.TicketRepository;
 import com.byultudy.redisstudy.ticket.TicketService;
 import org.junit.jupiter.api.BeforeEach;
@@ -37,38 +39,20 @@ class RedisStudyApplicationTests {
 
     Concert concert;
 
+    ConcertDto concertDto;
+
     @BeforeEach
     void setUp() {
-        deleteAll();
         initConcert();
-
-    }
-
-    void deleteAll() {
-        ticketRepository.deleteAll();
-        concertRepository.deleteAll();
     }
 
     void initConcert() {
-        concert = Concert.builder()
-                .id(1L)
+        concertDto = ConcertDto.builder()
                 .ticketQuantity(100L)
-                .targetDateTime(LocalDateTime.now())
                 .build();
-        concertRepository.save(concert);
+        concertService.create(concertDto);
     }
 
-    @DisplayName("캐시테스트")
-    @Test
-    void redisTest() {
-        for (int i = 0; i <= 1000; i++) {
-            long qty = concertService.getQty(concert.getId());
-            System.out.println("qty = " + qty);
-            if (i % 10 == 0) {
-                concertService.reserve(concert.getId(), 10L);
-            }
-        }
-    }
 
     @DisplayName("티켓예매")
     @Test
@@ -84,7 +68,7 @@ class RedisStudyApplicationTests {
                 try {
                     ticketService.create(concert.getId(), userId);
                 } catch (Exception e) {
-                    System.out.println("user"+userId+"님 " + e.getMessage());
+                    System.out.println("user" + userId + "님 " + e.getMessage());
                 } finally {
                     latch.countDown();
                 }
@@ -93,10 +77,45 @@ class RedisStudyApplicationTests {
         latch.await();
         assertThat(ticketService.count(concert.getId())).isEqualTo(concert.getTicketQuantity());
     }
-    
+
     @Test
     void reserveTest() {
-        Long reserve = concertService.reserve(1L, 50L);
+        redisRepository.setHash("concert", 1L, concert);
+        ConcertDto concert1 = redisRepository.getHash("concert", 1L, ConcertDto.class).orElseThrow(() -> new RuntimeException("null에러"));
+        System.out.println("concert1 = " + concert1);
     }
 
+    @Test
+    void ticketServiceTest() throws InterruptedException {
+        int threadCount = 1000;
+
+        ExecutorService executorService = Executors.newFixedThreadPool(32);
+        CountDownLatch latch = new CountDownLatch(threadCount);
+
+        for (int i = 0; i < threadCount; i++) {
+            long userId = i + 1;
+            executorService.submit(() -> {
+                try {
+                    TicketDto ticketDto = TicketDto.builder()
+                            .concertId(1L)
+                            .customerId(userId)
+                            .build();
+                    ticketService.create(ticketDto);
+                } catch (Exception e) {
+                    System.out.println("user" + userId + "님 " + e.getMessage());
+                } finally {
+                    latch.countDown();
+                }
+            });
+        }
+        latch.await();
+    }
+
+    @Test
+    void concertTest() {
+        for (long i = 0; i < 200; i++) {
+            TicketDto ticketDto = TicketDto.builder().customerId(i).concertId(1L).build();
+            ticketService.create(ticketDto);
+        }
+    }
 }

@@ -2,8 +2,6 @@ package com.byultudy.redisstudy.concert;
 
 import com.byultudy.redisstudy.redis.RedisRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.cache.annotation.CachePut;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -12,20 +10,41 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class ConcertService {
     private final ConcertRepository concertRepository;
+    private final RedisRepository redisRepository;
 
-    @Cacheable(value = "concert", key = "#id")
-    public long getQty(Long id) {
-        Concert concert = concertRepository.findById(id).orElseThrow(() -> new RuntimeException("콘서트가 존재하지 않습니다."));
-        return concert.getTicketQuantity();
-    }
+    private final String CONCERT_PREFIX = "concert";
 
     @Transactional
-    @CachePut(value = "concert", key = "#id")
-    /** 예매 수량  */
-    public Long reserve(Long id, Long qty) {
-        Concert concert = concertRepository.findById(id).orElseThrow(() -> new RuntimeException("콘서트가 존재하지 않습니다."));
-        concert.subtractTicketQuantity(qty);
-        return concert.getTicketQuantity();
+    public void create(ConcertDto concertDto) {
+        Concert concert = ConcertDto.toEntity(concertDto);
+        concertRepository.save(concert);
+        redisRepository.set(CONCERT_PREFIX + ":count:" + concert.getId(), 0L);
     }
 
+    public Concert find(Long id) {
+        return redisRepository.getHash(CONCERT_PREFIX, id, Concert.class).orElseGet(() -> {
+            Concert concert = concertRepository.findById(id).orElseThrow(() -> new RuntimeException("콘서트가 존재하지 않습니다."));
+            redisRepository.setHash(CONCERT_PREFIX, id, concert);
+            return concert;
+        });
+    }
+
+
+    @Transactional
+    public Concert reserve(Long id) {
+        Concert concert = redisRepository.getHash(CONCERT_PREFIX, id, Concert.class).orElseGet(() -> {
+            Concert c = concertRepository.findById(id).orElseThrow(() -> new RuntimeException("콘서트가 존재하지 않습니다."));
+            redisRepository.setHash(CONCERT_PREFIX, id, c);
+            return c;
+        });
+        System.out.println("이전: " + concert);
+
+
+
+        concert.subtractTicketQuantity(1L);
+        redisRepository.setHash(CONCERT_PREFIX, id, concert);
+        System.out.println("이후: " + concert);
+
+        return concert;
+    }
 }
