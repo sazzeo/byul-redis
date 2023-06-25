@@ -11,15 +11,13 @@ import org.springframework.transaction.annotation.Transactional;
 public class ConcertService {
     private final ConcertRepository concertRepository;
     private final RedisRepository redisRepository;
-
     private final String CONCERT_PREFIX = "concert";
 
     @Transactional
     public void create(ConcertDto concertDto) {
         Concert concert = ConcertDto.toEntity(concertDto);
         concertRepository.save(concert);
-        redisRepository.set(CONCERT_PREFIX + ":ticketQuantity:" + concert.getId() ,  concert.getTicketQuantity());
-        redisRepository.set(CONCERT_PREFIX + ":count:" + concert.getId(), 0L);
+        redisRepository.set(CONCERT_PREFIX + ":count:" + concert.getId(), 0L); //티켓 예매된 수량
     }
 
     public Long getTicketQuantity(Long concertId) {
@@ -32,6 +30,7 @@ public class ConcertService {
         }
         return Long.parseLong(quantity);
     }
+    //read 락 걸어야 됨??
 
     public Long getReserveTicketCount(Long concertId) {
         return redisRepository.increment(CONCERT_PREFIX + ":count:" + concertId);
@@ -50,7 +49,6 @@ public class ConcertService {
             redisRepository.setHash(CONCERT_PREFIX, id, c);
             return c;
         });
-
         concert.subtractTicketQuantity(1L);
         redisRepository.setHash(CONCERT_PREFIX, id, concert);
         return concert;
