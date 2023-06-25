@@ -42,13 +42,12 @@ public class TicketService {
 
     @Transactional
     public TicketDto create(TicketDto ticketDto) {
-        Concert concert = concertService.reserve(ticketDto.getConcertId());
-        if (concert.getTicketQuantity().equals(0L)) {
+        Long qty = concertService.getReserveTicketCount(ticketDto.getConcertId());
+        if (qty > concertService.getTicketQuantity(ticketDto.getConcertId())) {
             throw new RuntimeException("티켓이 모두 소진 되었습니다.");
         }
         Ticket ticket = TicketDto.toEntity(ticketDto);
         return TicketDto.toDto(ticketRepository.save(ticket));
     }
-
 
 }
