@@ -9,9 +9,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/test")
 @RestController
 public class TestController {
-
     private final TestService testService;
-
     @PostMapping()
     public String jmeterTest(@RequestBody TestDto testDto) {
         return testService.create(testDto);

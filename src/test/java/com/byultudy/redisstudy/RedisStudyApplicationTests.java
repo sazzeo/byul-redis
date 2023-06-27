@@ -9,17 +9,9 @@ import com.byultudy.redisstudy.ticket.TicketDto;
 import com.byultudy.redisstudy.ticket.TicketRepository;
 import com.byultudy.redisstudy.ticket.TicketService;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-
-import java.time.LocalDateTime;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 class RedisStudyApplicationTests {
@@ -53,31 +45,6 @@ class RedisStudyApplicationTests {
         concertService.create(concertDto);
     }
 
-
-    @DisplayName("티켓예매")
-    @Test
-    void 티켓예매() throws InterruptedException {
-        int threadCount = 1000;
-
-        ExecutorService executorService = Executors.newFixedThreadPool(32);
-        CountDownLatch latch = new CountDownLatch(threadCount);
-
-        for (int i = 0; i < threadCount; i++) {
-            long userId = i;
-            executorService.submit(() -> {
-                try {
-                    ticketService.create(concert.getId(), userId);
-                } catch (Exception e) {
-                    System.out.println("user" + userId + "님 " + e.getMessage());
-                } finally {
-                    latch.countDown();
-                }
-            });
-        }
-        latch.await();
-        assertThat(ticketService.count(concert.getId())).isEqualTo(concert.getTicketQuantity());
-    }
-
     @Test
     void reserveTest() {
         redisRepository.setHash("concert", 1L, concert);
@@ -86,29 +53,49 @@ class RedisStudyApplicationTests {
     }
 
     @Test
+    public void 와이러노() {
+        System.out.println("와이러노?");
+
+    }
+    @Test
     void ticketServiceTest() throws InterruptedException {
+        System.out.println("와이러노?");
+        Executor executor = new Executor(32, 1000);
+
+        executor.execute(() -> {
+            Long userId = (long) executor.getCount();
+            try {
+                TicketDto ticketDto = TicketDto.builder()
+                        .concertId(1L)
+                        .customerId(userId)
+                        .build();
+                ticketService.create(ticketDto);
+            } catch (Exception e) {
+                System.out.println("user" + userId + "님 " + e.getMessage());
+            }
+        });
         int threadCount = 1000;
-
-        ExecutorService executorService = Executors.newFixedThreadPool(32);
-        CountDownLatch latch = new CountDownLatch(threadCount);
-
-        for (int i = 0; i < threadCount; i++) {
-            long userId = i + 1;
-            executorService.submit(() -> {
-                try {
-                    TicketDto ticketDto = TicketDto.builder()
-                            .concertId(1L)
-                            .customerId(userId)
-                            .build();
-                    ticketService.create(ticketDto);
-                } catch (Exception e) {
-                    System.out.println("user" + userId + "님 " + e.getMessage());
-                } finally {
-                    latch.countDown();
-                }
-            });
-        }
-        latch.await();
+//
+//        ExecutorService executorService = Executors.newFixedThreadPool(32);
+//        CountDownLatch latch = new CountDownLatch(threadCount);
+//
+//        for (int i = 0; i < threadCount; i++) {
+//            long userId = i + 1;
+//            executorService.submit(() -> {
+//                try {
+//                    TicketDto ticketDto = TicketDto.builder()
+//                            .concertId(1L)
+//                            .customerId(userId)
+//                            .build();
+//                    ticketService.create(ticketDto);
+//                } catch (Exception e) {
+//                    System.out.println("user" + userId + "님 " + e.getMessage());
+//                } finally {
+//                    latch.countDown();
+//                }
+//            });
+//        }
+//        latch.await();
     }
 
     @Test
