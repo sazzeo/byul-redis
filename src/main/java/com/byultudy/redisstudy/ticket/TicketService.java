@@ -1,10 +1,8 @@
 package com.byultudy.redisstudy.ticket;
 
-import com.byultudy.redisstudy.concert.Concert;
 import com.byultudy.redisstudy.concert.ConcertService;
 import com.byultudy.redisstudy.redis.RedisRepository;
 import lombok.RequiredArgsConstructor;
-import org.redisson.api.RedissonClient;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,7 +17,6 @@ public class TicketService {
 
     private final String KEY_PREFIX = "count:ticket:";
 
-    private final RedissonClient redissonClient;
 
     public Long count(Long concertId) {
         return ticketRepository.countByConcertId(concertId);

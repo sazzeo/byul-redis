@@ -9,4 +9,4 @@
 - @TransactionEventListener : afterCommit
 - 레디션 => 레디스 락 구현해줌
 - java.time.instance => 시간 뽑아주는 애
-- 스케쥴러로 insert 
+- 스케쥴러로 insert

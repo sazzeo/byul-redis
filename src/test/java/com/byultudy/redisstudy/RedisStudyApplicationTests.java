@@ -52,14 +52,9 @@ class RedisStudyApplicationTests {
         System.out.println("concert1 = " + concert1);
     }
 
-    @Test
-    public void 와이러노() {
-        System.out.println("와이러노?");
 
-    }
     @Test
     void ticketServiceTest() throws InterruptedException {
-        System.out.println("와이러노?");
         Executor executor = new Executor(32, 1000);
 
         executor.execute(() -> {
@@ -74,28 +69,6 @@ class RedisStudyApplicationTests {
                 System.out.println("user" + userId + "님 " + e.getMessage());
             }
         });
-        int threadCount = 1000;
-//
-//        ExecutorService executorService = Executors.newFixedThreadPool(32);
-//        CountDownLatch latch = new CountDownLatch(threadCount);
-//
-//        for (int i = 0; i < threadCount; i++) {
-//            long userId = i + 1;
-//            executorService.submit(() -> {
-//                try {
-//                    TicketDto ticketDto = TicketDto.builder()
-//                            .concertId(1L)
-//                            .customerId(userId)
-//                            .build();
-//                    ticketService.create(ticketDto);
-//                } catch (Exception e) {
-//                    System.out.println("user" + userId + "님 " + e.getMessage());
-//                } finally {
-//                    latch.countDown();
-//                }
-//            });
-//        }
-//        latch.await();
     }
 
     @Test

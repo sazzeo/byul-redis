@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 public class TestController {
     private final TestService testService;
-    @PostMapping()
+    @PostMapping
     public String jmeterTest(@RequestBody TestDto testDto) {
         return testService.create(testDto);
     }
