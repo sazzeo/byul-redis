@@ -11,8 +11,8 @@ public class Ticket {
     @Column(name = "ticketId")
     private Long id;
 
-    private Long customerNo;
+    private Long customerId;
 
-    private Long convertNo;
+    private Long concertId;
 
 }
