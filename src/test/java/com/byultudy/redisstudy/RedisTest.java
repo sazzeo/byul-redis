@@ -31,20 +31,7 @@ public class RedisTest {
         redisTemplate.setHashValueSerializer(new StringRedisSerializer());
         redisTemplate.afterPropertiesSet();
 
-//        redisRepository = new RedisRepository(redisTemplate);
     }
 
-    int rsvCount = 0;
-
-    @Test
-    void redisTest() {
-        ConcertDto concertDto = ConcertDto.builder()
-                .id(1L)
-                .ticketQuantity(100L)
-                .build();
-
-        Object concert = redisTemplate.opsForHash().get("concert", "1");
-        System.out.println(concert);
-    }
 
 }

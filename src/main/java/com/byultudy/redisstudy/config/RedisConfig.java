@@ -44,5 +44,4 @@ public class RedisConfig {
         config.setLockWatchdogTimeout(5);
         return Redisson.create(config);
     }
-
 }

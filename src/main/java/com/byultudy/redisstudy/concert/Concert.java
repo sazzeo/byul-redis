@@ -20,7 +20,12 @@ public class Concert {
 
     private Long ticketQuantity;
 
+    private Boolean hasQuantity;
+
     public void subtractTicketQuantity(Long ticketQuantity) {
-        this.ticketQuantity = this.ticketQuantity- ticketQuantity;
+        this.ticketQuantity = this.ticketQuantity - ticketQuantity;
+        if (this.ticketQuantity <= 0) {
+            this.hasQuantity = false;
+        }
     }
 }
